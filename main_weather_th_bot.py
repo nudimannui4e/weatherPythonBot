@@ -1,10 +1,20 @@
 import requests
-from config import open_weather_token
 import datetime
+from config import bot_token, open_weather_token
+from aiogram import Bot, types
+from aiogram.dispatcher import Dispatcher
+from aiogram.utils import executor
 
 
-def get_weather(city, open_weather_token):
+bot = Bot(token=bot_token)
+dp = Dispatcher(bot)
 
+@dp.message_handler(commands=["start"])
+async def start_command(message: types.Message):
+    await message.reply("Привет! Напиши название города:")
+
+@dp.message_handler()
+async def get_weather(message: types.Message):
     code_to_smile = {
         "Clear": "Ясно \U00002600",
         "Clouds": "Облачно \U00002601",
@@ -17,9 +27,10 @@ def get_weather(city, open_weather_token):
 
     try:
         r = requests.get(
-            f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={open_weather_token}&units=metric"
+            f"https://api.openweathermap.org/data/2.5/weather?q={message.text}&appid={open_weather_token}&units=metric"
         )
         data = r.json()
+
         country = data["sys"]["country"]
         city = data["name"]
         cur_weather = data["main"]["temp"]
@@ -37,22 +48,15 @@ def get_weather(city, open_weather_token):
         sunset = datetime.datetime.fromtimestamp(data["sys"]["sunset"])
         length_of_day = datetime.datetime.fromtimestamp(data["sys"]["sunset"]) - datetime.datetime.fromtimestamp(data["sys"]["sunrise"])
 
-        print(f"\U000026A1--сводка-погоды--\U000026A1\n"
+        await message.reply(f"\U000026A1--сводка-погоды--\U000026A1\n"
               f"Погода в городе: {city}\nСтрана: {country}\n"
               f"Температура: {cur_weather}°C {wd}\n"
               f"Макс: {temp_max} °C\nМин:  {temp_min} °C\nВетер: {wind} м/с\n"
               f"Влажность: {humidity}%\nДавление {pressure} мм рт.ст\n"
               f"Рассвет: {sunrise}\nЗакат:   {sunset}\n"
               f"Продолжительность дня: {length_of_day}")
-    except Exception as ex:
-        print(ex)
-        print("Проверьте название города.")
+    except:
+        await message.reply("\U00002620 Проверьте название города \U00002620")
 
-
-def main():
-    city = input("Введите город: ")
-    get_weather(city, open_weather_token)
-
-
-if __name__ == "__main__":
-    main()
+if __name__ == '__main__':
+    executor.start_polling(dp)

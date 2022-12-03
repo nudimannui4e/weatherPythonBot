@@ -43,7 +43,7 @@ def get_weather(city, open_weather_token):
               f"Температура: {cur_weather}°C {wd}\n"
               f"Макс: {temp_max}°C\nМин: {temp_min}°C\nВетер: {wind}м/с\n"
               f"Влажность: {humidity}%\nДавление {pressure} мм рт.ст\n"
-              f"Рассвет: {sunrise}\nЗакат: {sunset}\n"
+              f"Рассвет: {sunrise}\nЗакат:   {sunset}\n"
               f"Продолжительность дня: {length_of_day}")
     except Exception as ex:
         print(ex)
